@@ -24,6 +24,7 @@ type RawWordRecord = {
 type WordLibraryApiResponse = {
   success: number
   data?: RawWordRecord[]
+  id?: unknown
   pages?: {
     page?: number
     pageSize?: number
@@ -52,31 +53,76 @@ const normalizePages = (
 type WordLibraryState = {
   word: string
   statuses: UWordStatus[]
+  order: string
   page: number
   pageSize: number
   data: UWord[]
   pages: WordLibraryPages | null
   loading: boolean
+  mutating: boolean
   error: string | null
   setWord: (value: string) => void
   toggleStatus: (value: UWordStatus) => void
   resetFilters: () => void
+  setOrder: (value: string) => void
   setPage: (value: number) => void
   setPageSize: (value: number) => void
   setData: (value: UWord[]) => void
   setError: (value: string | null) => void
   setLoading: (value: boolean) => void
+  setMutating: (value: boolean) => void
   fetchWords: () => Promise<void>
+  createWordsBatch: (payload: { words: string[]; status: UWordStatus }) => Promise<void>
+  updateWordsStatusBatch: (payload: {
+    words: string[]
+    status: UWordStatus
+  }) => Promise<void>
+  deleteWordsBatch: (payload: { words: string[] }) => Promise<void>
+  updateWordStatus: (payload: { word: string; status: UWordStatus }) => Promise<void>
+  deleteWord: (payload: { word: string }) => Promise<void>
+}
+
+const parseErrorMessage = async (response: Response) => {
+  const fallback = `${response.status} ${response.statusText}`.trim()
+  try {
+    const json = (await response.json()) as Partial<WordLibraryApiResponse>
+    if (typeof json.message === 'string' && json.message.trim()) {
+      return json.message
+    }
+  } catch {
+    // ignore
+  }
+  return fallback || 'Request failed'
+}
+
+function assertSuccess(
+  json: unknown,
+  fallbackMessage: string
+): asserts json is WordLibraryApiResponse {
+  if (
+    !json ||
+    typeof json !== 'object' ||
+    !('success' in json) ||
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (json as any).success !== 1
+  ) {
+    const message =
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      typeof (json as any)?.message === 'string' ? (json as any).message : null
+    throw new Error(message ?? fallbackMessage)
+  }
 }
 
 export const useWordLibraryStore = create<WordLibraryState>((set, get) => ({
   word: '',
   statuses: [],
+  order: '',
   page: 1,
   pageSize: 10,
   data: [],
   pages: null,
   loading: false,
+  mutating: false,
   error: null,
   setWord: (value) =>
     set(() => ({ word: value, page: 1 })), // reset to first page when filter changes
@@ -92,6 +138,12 @@ export const useWordLibraryStore = create<WordLibraryState>((set, get) => ({
     set(() => ({
       word: '',
       statuses: [],
+      order: '',
+      page: 1,
+    })),
+  setOrder: (value) =>
+    set(() => ({
+      order: value,
       page: 1,
     })),
   setPage: (value) =>
@@ -107,8 +159,9 @@ export const useWordLibraryStore = create<WordLibraryState>((set, get) => ({
   setData: (value) => set({ data: value }),
   setError: (value) => set({ error: value }),
   setLoading: (value) => set({ loading: value }),
+  setMutating: (value) => set({ mutating: value }),
   fetchWords: async () => {
-    const { word, statuses, page, pageSize } = get()
+    const { word, statuses, order, page, pageSize } = get()
     set({ loading: true, error: null })
 
     const query = new URLSearchParams({
@@ -122,6 +175,10 @@ export const useWordLibraryStore = create<WordLibraryState>((set, get) => ({
 
     if (statuses.length > 0) {
       query.set('status_in', statuses.join(','))
+    }
+
+    if (order.trim()) {
+      query.set('_order', order.trim())
     }
 
     try {
@@ -156,6 +213,167 @@ export const useWordLibraryStore = create<WordLibraryState>((set, get) => ({
         loading: false,
         error: error instanceof Error ? error.message : 'Unknown error',
       })
+    }
+  },
+  createWordsBatch: async ({ words, status }) => {
+    if (words.length === 0) return
+    set({ mutating: true, error: null })
+    const now = Date.now()
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/batch-upsert`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          conflictKeys: ['word'],
+          items: words.map((word) => ({
+            word,
+            status,
+            added_at: now,
+            updated_at: now,
+          })),
+        }),
+      })
+
+      if (!response.ok) {
+        throw new Error(await parseErrorMessage(response))
+      }
+
+      const json = (await response.json()) as unknown
+      assertSuccess(json, 'Failed to add words.')
+
+      await get().fetchWords()
+      set({ mutating: false })
+    } catch (error) {
+      set({
+        mutating: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
+      })
+      throw error
+    }
+  },
+  updateWordsStatusBatch: async ({ words, status }) => {
+    if (words.length === 0) return
+    set({ mutating: true, error: null })
+    const now = Date.now()
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/batch`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(
+          words.map((word) => ({
+            word,
+            status,
+            updated_at: now,
+          }))
+        ),
+      })
+
+      if (!response.ok) {
+        throw new Error(await parseErrorMessage(response))
+      }
+
+      const json = (await response.json()) as unknown
+      assertSuccess(json, 'Failed to update words.')
+
+      await get().fetchWords()
+      set({ mutating: false })
+    } catch (error) {
+      set({
+        mutating: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
+      })
+      throw error
+    }
+  },
+  deleteWordsBatch: async ({ words }) => {
+    if (words.length === 0) return
+    set({ mutating: true, error: null })
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/batch`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ids: words }),
+      })
+
+      if (!response.ok) {
+        throw new Error(await parseErrorMessage(response))
+      }
+
+      const json = (await response.json()) as unknown
+      assertSuccess(json, 'Failed to delete words.')
+
+      await get().fetchWords()
+      set({ mutating: false })
+    } catch (error) {
+      set({
+        mutating: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
+      })
+      throw error
+    }
+  },
+  updateWordStatus: async ({ word, status }) => {
+    if (!word.trim()) return
+    set({ mutating: true, error: null })
+    const now = Date.now()
+
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/${encodeURIComponent(word)}`,
+        {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status, updated_at: now }),
+        }
+      )
+
+      if (!response.ok) {
+        throw new Error(await parseErrorMessage(response))
+      }
+
+      const json = (await response.json()) as unknown
+      assertSuccess(json, 'Failed to update the word.')
+
+      await get().fetchWords()
+      set({ mutating: false })
+    } catch (error) {
+      set({
+        mutating: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
+      })
+      throw error
+    }
+  },
+  deleteWord: async ({ word }) => {
+    if (!word.trim()) return
+    set({ mutating: true, error: null })
+
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/${encodeURIComponent(word)}`,
+        {
+          method: 'DELETE',
+        }
+      )
+
+      if (!response.ok) {
+        throw new Error(await parseErrorMessage(response))
+      }
+
+      const json = (await response.json()) as unknown
+      assertSuccess(json, 'Failed to delete the word.')
+
+      await get().fetchWords()
+      set({ mutating: false })
+    } catch (error) {
+      set({
+        mutating: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
+      })
+      throw error
     }
   },
 }))

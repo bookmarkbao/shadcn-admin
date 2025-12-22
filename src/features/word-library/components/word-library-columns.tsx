@@ -1,45 +1,56 @@
 import { type ColumnDef } from '@tanstack/react-table'
 import { Badge } from '@/components/ui/badge'
+import { Checkbox } from '@/components/ui/checkbox'
+import { DataTableColumnHeader } from '@/components/data-table'
 import { cn } from '@/lib/utils'
 import { type UWord, type UWordStatus } from '../data/types'
 import dayjs from 'dayjs'
-
-const statusVariants: Record<UWordStatus, string> = {
-  new: 'text-muted-foreground bg-muted/40 border-muted-foreground/20',
-  learning: 'text-primary bg-primary/10 border-primary/20',
-  mastered:
-    'text-emerald-700 bg-emerald-500/10 border-emerald-500/20 dark:text-emerald-300',
-  ignored: 'text-destructive bg-destructive/10 border-destructive/20',
-}
-
-const getStatusLabel = (status: UWordStatus) => {
-  switch (status) {
-    case 'learning':
-      return '学习中'
-    case 'mastered':
-      return '已掌握'
-    case 'ignored':
-      return '忽略'
-    default:
-      return '新词'
-  }
-}
+import { WordLibraryRowActions } from './word-library-row-actions'
+import { getWordStatusLabel, WORD_STATUS_BADGE_CLASSNAME } from '../constants'
 
 export const wordLibraryColumns: ColumnDef<UWord>[] = [
   {
+    id: 'select',
+    header: ({ table }) => (
+      <Checkbox
+        checked={
+          table.getIsAllPageRowsSelected() ||
+          (table.getIsSomePageRowsSelected() && 'indeterminate')
+        }
+        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+        aria-label='Select all'
+        className='translate-y-[2px]'
+      />
+    ),
+    cell: ({ row }) => (
+      <Checkbox
+        checked={row.getIsSelected()}
+        onCheckedChange={(value) => row.toggleSelected(!!value)}
+        aria-label='Select row'
+        className='translate-y-[2px]'
+      />
+    ),
+    enableSorting: false,
+    enableHiding: false,
+  },
+  {
     accessorKey: 'word',
-    header: '单词',
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title='单词' />
+    ),
     cell: ({ getValue }) => (
       <div className='text-base font-semibold leading-tight text-foreground'>
         {getValue<string>()?.toLowerCase()}
       </div>
     ),
-    enableSorting: false,
-    filterFn: 'includesString',
+    enableSorting: true,
+    enableHiding: false,
   },
   {
     accessorKey: 'status',
-    header: '状态',
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title='状态' />
+    ),
     cell: ({ getValue }) => {
       const value = getValue<UWordStatus>()
       return (
@@ -47,10 +58,10 @@ export const wordLibraryColumns: ColumnDef<UWord>[] = [
           variant='outline'
           className={cn(
             'border px-3 py-1 text-xs font-medium',
-            statusVariants[value]
+            WORD_STATUS_BADGE_CLASSNAME[value]
           )}
         >
-          {getStatusLabel(value)}
+          {getWordStatusLabel(value)}
         </Badge>
       )
     },
@@ -62,9 +73,10 @@ export const wordLibraryColumns: ColumnDef<UWord>[] = [
     enableSorting: false,
   },
   {
-    accessorFn: (row) => row.addedAt,
-    id: 'addedAt',
-    header: '加入时间',
+    accessorKey: 'addedAt',
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title='加入时间' />
+    ),
     cell: ({ getValue }) => {
       const value = getValue<number>()
       return (
@@ -73,12 +85,14 @@ export const wordLibraryColumns: ColumnDef<UWord>[] = [
         </div>
       )
     },
-    enableSorting: false,
+    enableSorting: true,
+    enableHiding: false,
   },
   {
-    accessorFn: (row) => row.updatedAt,
-    id: 'updatedAt',
-    header: '更新时间',
+    accessorKey: 'updatedAt',
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title='更新时间' />
+    ),
     cell: ({ getValue }) => {
       const value = getValue<number>()
       return (
@@ -87,6 +101,12 @@ export const wordLibraryColumns: ColumnDef<UWord>[] = [
         </div>
       )
     },
-    enableSorting: false,
+    enableSorting: true,
+    enableHiding: false,
+    },
+  {
+    id: 'actions',
+    cell: WordLibraryRowActions,
+    enableHiding: false,
   },
 ]

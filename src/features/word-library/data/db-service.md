@@ -24,7 +24,8 @@
 | 批量创建    | POST   | `/api/db/:table/batch` | body 为 JSON 数组（对象列表）  |
 | 批量更新    | PATCH  | `/api/db/:table/batch` | body 为 JSON 数组（每项含主键） |
 | 批量删除    | DELETE | `/api/db/:table/batch` | body 为 `{ ids: [...] }`       |
-
+| 批量 Upsert | POST   | `/api/db/:table/batch-upsert` | body 为 `{ conflictKeys, items }` |
+| 单条 Upsert | POST   | `/api/db/:table/upsert` | body 为 `{ conflictKeys, item }` |
 ## 受保护的表
 
 为保护系统关键数据，下列表名无法访问：
