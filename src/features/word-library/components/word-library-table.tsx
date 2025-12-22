@@ -8,6 +8,7 @@ import {
   useReactTable,
 } from '@tanstack/react-table'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
+import { Separator } from '@/components/ui/separator'
 import {
   Table,
   TableBody,
@@ -21,6 +22,7 @@ import { WordLibraryStatusFilters } from '../components/word-library-status-filt
 import { useWordLibraryStore } from '../store'
 import { WordLibraryBulkActions } from './word-library-bulk-actions'
 import { wordLibraryColumns } from './word-library-columns'
+import { WordLibraryUpdatedAtFilter } from './word-library-updated-at-filter'
 
 const sortingToOrder = (sorting: SortingState) => {
   const fieldMap: Record<string, string> = {
@@ -114,7 +116,11 @@ export function WordLibraryTable() {
         </Alert>
       )}
       <div className='flex items-center justify-between text-xs text-muted-foreground'>
-        <WordLibraryStatusFilters />
+        <div className='flex flex-wrap items-center gap-3'>
+          <WordLibraryUpdatedAtFilter />
+          <Separator orientation='vertical' className='h-6' />
+          <WordLibraryStatusFilters />
+        </div>
         <div className='flex gap-2'>
           <span>
             {pages

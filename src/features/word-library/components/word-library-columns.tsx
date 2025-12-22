@@ -1,12 +1,13 @@
 import { type ColumnDef } from '@tanstack/react-table'
+import dayjs from 'dayjs'
+import { cn } from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'
 import { Checkbox } from '@/components/ui/checkbox'
 import { DataTableColumnHeader } from '@/components/data-table'
-import { cn } from '@/lib/utils'
-import { type UWord, type UWordStatus } from '../data/types'
-import dayjs from 'dayjs'
-import { WordLibraryRowActions } from './word-library-row-actions'
 import { getWordStatusLabel, WORD_STATUS_BADGE_CLASSNAME } from '../constants'
+import { type UWord, type UWordStatus } from '../data/types'
+import { FluidButton } from './fluid-button'
+import { WordLibraryRowActions } from './word-library-row-actions'
 
 export const wordLibraryColumns: ColumnDef<UWord>[] = [
   {
@@ -19,7 +20,7 @@ export const wordLibraryColumns: ColumnDef<UWord>[] = [
         }
         onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
         aria-label='Select all'
-        className='translate-y-[2px]'
+        className='translate-y-0.5'
       />
     ),
     cell: ({ row }) => (
@@ -27,7 +28,7 @@ export const wordLibraryColumns: ColumnDef<UWord>[] = [
         checked={row.getIsSelected()}
         onCheckedChange={(value) => row.toggleSelected(!!value)}
         aria-label='Select row'
-        className='translate-y-[2px]'
+        className='translate-y-0.5'
       />
     ),
     enableSorting: false,
@@ -39,7 +40,7 @@ export const wordLibraryColumns: ColumnDef<UWord>[] = [
       <DataTableColumnHeader column={column} title='单词' />
     ),
     cell: ({ getValue }) => (
-      <div className='text-base font-semibold leading-tight text-foreground'>
+      <div className='text-base leading-tight font-semibold text-foreground'>
         {getValue<string>()?.toLowerCase()}
       </div>
     ),
@@ -103,9 +104,10 @@ export const wordLibraryColumns: ColumnDef<UWord>[] = [
     },
     enableSorting: true,
     enableHiding: false,
-    },
+  },
   {
     id: 'actions',
+    header: () => <div className='flex justify-end'><FluidButton /></div>,
     cell: WordLibraryRowActions,
     enableHiding: false,
   },

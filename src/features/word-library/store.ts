@@ -54,6 +54,9 @@ type WordLibraryState = {
   word: string
   statuses: UWordStatus[]
   order: string
+  updatedAtPreset: string
+  updatedAtGte: number | null
+  updatedAtLte: number | null
   page: number
   pageSize: number
   data: UWord[]
@@ -61,10 +64,17 @@ type WordLibraryState = {
   loading: boolean
   mutating: boolean
   error: string | null
+  isFluid: boolean
+  toggleFluid: () => void
   setWord: (value: string) => void
   toggleStatus: (value: UWordStatus) => void
   resetFilters: () => void
   setOrder: (value: string) => void
+  setUpdatedAtFilter: (value: {
+    preset: string
+    gte: number | null
+    lte: number | null
+  }) => void
   setPage: (value: number) => void
   setPageSize: (value: number) => void
   setData: (value: UWord[]) => void
@@ -117,6 +127,9 @@ export const useWordLibraryStore = create<WordLibraryState>((set, get) => ({
   word: '',
   statuses: [],
   order: '',
+  updatedAtPreset: '',
+  updatedAtGte: null,
+  updatedAtLte: null,
   page: 1,
   pageSize: 10,
   data: [],
@@ -124,6 +137,7 @@ export const useWordLibraryStore = create<WordLibraryState>((set, get) => ({
   loading: false,
   mutating: false,
   error: null,
+  isFluid: false,
   setWord: (value) =>
     set(() => ({ word: value, page: 1 })), // reset to first page when filter changes
   toggleStatus: (value) =>
@@ -139,11 +153,21 @@ export const useWordLibraryStore = create<WordLibraryState>((set, get) => ({
       word: '',
       statuses: [],
       order: '',
+      updatedAtPreset: '',
+      updatedAtGte: null,
+      updatedAtLte: null,
       page: 1,
     })),
   setOrder: (value) =>
     set(() => ({
       order: value,
+      page: 1,
+    })),
+  setUpdatedAtFilter: ({ preset, gte, lte }) =>
+    set(() => ({
+      updatedAtPreset: preset,
+      updatedAtGte: gte,
+      updatedAtLte: lte,
       page: 1,
     })),
   setPage: (value) =>
@@ -161,7 +185,8 @@ export const useWordLibraryStore = create<WordLibraryState>((set, get) => ({
   setLoading: (value) => set({ loading: value }),
   setMutating: (value) => set({ mutating: value }),
   fetchWords: async () => {
-    const { word, statuses, order, page, pageSize } = get()
+    const { word, statuses, order, updatedAtGte, updatedAtLte, page, pageSize } =
+      get()
     set({ loading: true, error: null })
 
     const query = new URLSearchParams({
@@ -179,6 +204,14 @@ export const useWordLibraryStore = create<WordLibraryState>((set, get) => ({
 
     if (order.trim()) {
       query.set('_order', order.trim())
+    }
+
+    if (typeof updatedAtGte === 'number') {
+      query.set('updated_at_gte', updatedAtGte.toString())
+    }
+
+    if (typeof updatedAtLte === 'number') {
+      query.set('updated_at_lte', updatedAtLte.toString())
     }
 
     try {
@@ -376,4 +409,8 @@ export const useWordLibraryStore = create<WordLibraryState>((set, get) => ({
       throw error
     }
   },
+  toggleFluid: () =>
+    set((state) => ({
+      isFluid: !state.isFluid,
+    })),
 }))

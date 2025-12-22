@@ -77,16 +77,13 @@ export function WordLibraryBatchAddDialog({
 
         <div className='space-y-4'>
           <Label className='space-y-1.5'>
-            <span>单词列表</span>
             <Textarea
               value={raw}
               onChange={(e) => setRaw(e.target.value)}
               placeholder={'apple\nbanana, orange'}
               className='min-h-40'
             />
-            <span className='text-xs text-muted-foreground'>
-              已解析 {words.length} 个单词
-            </span>
+          
           </Label>
 
           <div className='space-y-1.5'>

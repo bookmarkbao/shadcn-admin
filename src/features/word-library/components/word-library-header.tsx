@@ -7,22 +7,13 @@ import { WordLibraryBatchAddDialog } from './word-library-batch-add-dialog'
 
 export function WordLibraryHeader() {
   const word = useWordLibraryStore((state) => state.word)
-  const order = useWordLibraryStore((state) => state.order)
-  const page = useWordLibraryStore((state) => state.page)
-  const pageSize = useWordLibraryStore((state) => state.pageSize)
   const loading = useWordLibraryStore((state) => state.loading)
   const setWord = useWordLibraryStore((state) => state.setWord)
   const resetFilters = useWordLibraryStore((state) => state.resetFilters)
-  const fetchWords = useWordLibraryStore((state) => state.fetchWords)
+
 
   const [showBatchAdd, setShowBatchAdd] = useState(false)
   const [draftWord, setDraftWord] = useState(word)
-
-  const statusesKey = useWordLibraryStore((state) => state.statuses.join(','))
-
-  useEffect(() => {
-    fetchWords()
-  }, [fetchWords, word, statusesKey, order, page, pageSize])
 
   useEffect(() => {
     setDraftWord(word)
@@ -54,7 +45,7 @@ export function WordLibraryHeader() {
         <Button size='sm' onClick={handleSearch}>
           搜索
         </Button>
-         <Button variant='outline' size='sm' onClick={handleReset}>
+        <Button variant='outline' size='sm' onClick={handleReset}>
           重置
         </Button>
       </div>
@@ -64,6 +55,7 @@ export function WordLibraryHeader() {
           <Plus className='me-1 h-4 w-4' />
           批量添加
         </Button>
+
         {loading && (
           <Loader2 className='h-4 w-4 animate-spin text-muted-foreground' />
         )}

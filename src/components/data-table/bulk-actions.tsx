@@ -171,7 +171,7 @@ export function DataTableBulkActions<TData>({
               </Button>
             </TooltipTrigger>
             <TooltipContent>
-              <p>Clear selection (Escape)</p>
+              <p>取消选中 </p>
             </TooltipContent>
           </Tooltip>
 

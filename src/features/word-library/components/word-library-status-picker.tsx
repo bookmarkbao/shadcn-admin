@@ -1,4 +1,4 @@
-import { Check } from 'lucide-react'
+import { Circle, CircleCheck } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { WORD_STATUS_BUTTON_CLASSNAME, WORD_STATUS_OPTIONS } from '../constants'
@@ -32,7 +32,7 @@ export function WordLibraryStatusPicker({
             )}
           >
             <span className='inline-flex w-4 items-center justify-center'>
-              {active ? <Check className='h-4 w-4' /> : null}
+              {active ? <CircleCheck className='h-4 w-4' /> : <Circle className='h-4 w-4' />}
             </span>
             <span>{opt.label}</span>
           </Button>
