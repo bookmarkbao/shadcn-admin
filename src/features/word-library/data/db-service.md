@@ -55,3 +55,7 @@
 - POST 会返回 `{ success: 1, id: <lastInsertRowId> }`；若主键为 `INTEGER PRIMARY KEY`, 会自动读取 `lastInsertRowid`。
 - PUT/DELETE 若没有匹配行，会返回 `success:0, message:'No rows updated/deleted'`。
 
+## Electron 插件环境提示
+
+在 Electron 的 webview/远程页面中，浏览器的 PNA/CORS 规则可能阻止页面直接请求 `http://127.0.0.1:23333`。
+此时可以使用 `window.$mapi.http.request({ path, method, body })` 由主进程代为转发到本机 API Server。

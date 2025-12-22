@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { adaptiveFetch } from '@/lib/adaptive-fetch'
 import type { UWord, UWordStatus } from './data/types'
 
 export type WordLibraryPages = {
@@ -11,8 +12,8 @@ export type WordLibraryPages = {
 }
 
 const API_BASE_URL =
-  import.meta.env.VITE_WORD_LIBRARY_API ??
-  'http://127.0.0.1:23333/api/db/user_words'
+  (import.meta.env.VITE_API_BASE_URL ?? 'http://127.0.0.1:23333') +
+  '/api/db/user_words'
 
 type RawWordRecord = {
   word: string
@@ -46,8 +47,7 @@ const normalizePages = (
   next: json.pages?.next ?? null,
   previous: json.pages?.previous ?? null,
   last: json.pages?.last ?? 0,
-  total:
-    json.pages?.total ?? (Array.isArray(json.data) ? json.data.length : 0),
+  total: json.pages?.total ?? (Array.isArray(json.data) ? json.data.length : 0),
 })
 
 type WordLibraryState = {
@@ -82,13 +82,19 @@ type WordLibraryState = {
   setLoading: (value: boolean) => void
   setMutating: (value: boolean) => void
   fetchWords: () => Promise<void>
-  createWordsBatch: (payload: { words: string[]; status: UWordStatus }) => Promise<void>
+  createWordsBatch: (payload: {
+    words: string[]
+    status: UWordStatus
+  }) => Promise<void>
   updateWordsStatusBatch: (payload: {
     words: string[]
     status: UWordStatus
   }) => Promise<void>
   deleteWordsBatch: (payload: { words: string[] }) => Promise<void>
-  updateWordStatus: (payload: { word: string; status: UWordStatus }) => Promise<void>
+  updateWordStatus: (payload: {
+    word: string
+    status: UWordStatus
+  }) => Promise<void>
   deleteWord: (payload: { word: string }) => Promise<void>
 }
 
@@ -138,8 +144,7 @@ export const useWordLibraryStore = create<WordLibraryState>((set, get) => ({
   mutating: false,
   error: null,
   isFluid: false,
-  setWord: (value) =>
-    set(() => ({ word: value, page: 1 })), // reset to first page when filter changes
+  setWord: (value) => set(() => ({ word: value, page: 1 })), // reset to first page when filter changes
   toggleStatus: (value) =>
     set((state) => {
       const exists = state.statuses.includes(value)
@@ -185,8 +190,15 @@ export const useWordLibraryStore = create<WordLibraryState>((set, get) => ({
   setLoading: (value) => set({ loading: value }),
   setMutating: (value) => set({ mutating: value }),
   fetchWords: async () => {
-    const { word, statuses, order, updatedAtGte, updatedAtLte, page, pageSize } =
-      get()
+    const {
+      word,
+      statuses,
+      order,
+      updatedAtGte,
+      updatedAtLte,
+      page,
+      pageSize,
+    } = get()
     set({ loading: true, error: null })
 
     const query = new URLSearchParams({
@@ -215,13 +227,15 @@ export const useWordLibraryStore = create<WordLibraryState>((set, get) => ({
     }
 
     try {
-      const response = await fetch(`${API_BASE_URL}?${query.toString()}`)
+      const response = await adaptiveFetch(`${API_BASE_URL}?${query.toString()}`)
       if (!response.ok) {
         throw new Error('Failed to load the word library.')
       }
       const json: WordLibraryApiResponse = await response.json()
       if (json.success !== 1) {
-        throw new Error(json.message ?? 'Unexpected response from word library.')
+        throw new Error(
+          json.message ?? 'Unexpected response from word library.'
+        )
       }
 
       const normalized: UWord[] =
@@ -254,7 +268,7 @@ export const useWordLibraryStore = create<WordLibraryState>((set, get) => ({
     const now = Date.now()
 
     try {
-      const response = await fetch(`${API_BASE_URL}/batch-upsert`, {
+      const response = await adaptiveFetch(`${API_BASE_URL}/batch-upsert`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -291,7 +305,7 @@ export const useWordLibraryStore = create<WordLibraryState>((set, get) => ({
     const now = Date.now()
 
     try {
-      const response = await fetch(`${API_BASE_URL}/batch`, {
+      const response = await adaptiveFetch(`${API_BASE_URL}/batch`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(
@@ -325,7 +339,7 @@ export const useWordLibraryStore = create<WordLibraryState>((set, get) => ({
     set({ mutating: true, error: null })
 
     try {
-      const response = await fetch(`${API_BASE_URL}/batch`, {
+      const response = await adaptiveFetch(`${API_BASE_URL}/batch`, {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ids: words }),
@@ -354,7 +368,7 @@ export const useWordLibraryStore = create<WordLibraryState>((set, get) => ({
     const now = Date.now()
 
     try {
-      const response = await fetch(
+      const response = await adaptiveFetch(
         `${API_BASE_URL}/${encodeURIComponent(word)}`,
         {
           method: 'PUT',
@@ -385,7 +399,7 @@ export const useWordLibraryStore = create<WordLibraryState>((set, get) => ({
     set({ mutating: true, error: null })
 
     try {
-      const response = await fetch(
+      const response = await adaptiveFetch(
         `${API_BASE_URL}/${encodeURIComponent(word)}`,
         {
           method: 'DELETE',

@@ -31,6 +31,10 @@ export const wordLibraryColumns: ColumnDef<UWord>[] = [
         className='translate-y-0.5'
       />
     ),
+      meta: {
+      thClassName: 'w-[40px]',
+      tdClassName: 'w-[40px] whitespace-nowrap',
+    },
     enableSorting: false,
     enableHiding: false,
   },
@@ -40,7 +44,7 @@ export const wordLibraryColumns: ColumnDef<UWord>[] = [
       <DataTableColumnHeader column={column} title='单词' />
     ),
     cell: ({ getValue }) => (
-      <div className='text-base leading-tight font-semibold text-foreground'>
+      <div className='text-base leading-tight font-semibold text-foreground text-left'>
         {getValue<string>()?.toLowerCase()}
       </div>
     ),
@@ -72,28 +76,17 @@ export const wordLibraryColumns: ColumnDef<UWord>[] = [
       return normalized.includes(row.getValue<UWordStatus>(id))
     },
     enableSorting: false,
-  },
-  {
-    accessorKey: 'addedAt',
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='加入时间' />
-    ),
-    cell: ({ getValue }) => {
-      const value = getValue<number>()
-      return (
-        <div className='text-sm text-muted-foreground'>
-          {value ? dayjs(value).format('YYYY-MM-DD HH:mm:ss') : '—'}
-        </div>
-      )
-    },
-    enableSorting: true,
-    enableHiding: false,
+
   },
   {
     accessorKey: 'updatedAt',
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title='更新时间' />
     ),
+    meta: {
+      thClassName: 'w-[220px]',
+      tdClassName: 'w-[220px] whitespace-nowrap',
+    },
     cell: ({ getValue }) => {
       const value = getValue<number>()
       return (
@@ -107,8 +100,16 @@ export const wordLibraryColumns: ColumnDef<UWord>[] = [
   },
   {
     id: 'actions',
-    header: () => <div className='flex justify-end'><FluidButton /></div>,
+    header: () => (
+      <div className='flex justify-end'>
+        <FluidButton />
+      </div>
+    ),
     cell: WordLibraryRowActions,
+    meta: {
+      thClassName: 'w-[120px]',
+      tdClassName: 'w-[120px] whitespace-nowrap',
+    },
     enableHiding: false,
   },
 ]
