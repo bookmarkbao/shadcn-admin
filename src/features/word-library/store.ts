@@ -121,7 +121,7 @@ export const useWordLibraryStore = create<WordLibraryState>((set, get) => ({
     }
 
     if (statuses.length > 0) {
-      query.set('status', statuses.join(','))
+      query.set('status_in', statuses.join(','))
     }
 
     try {

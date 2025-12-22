@@ -2,20 +2,15 @@ import { type ColumnDef } from '@tanstack/react-table'
 import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
 import { type UWord, type UWordStatus } from '../data/types'
+import dayjs from 'dayjs'
 
 const statusVariants: Record<UWordStatus, string> = {
-  new: 'text-secondary-foreground bg-secondary/10 border-secondary',
-  learning: 'text-primary-foreground bg-primary/10 border-primary',
-  mastered: 'text-foreground/70 bg-foreground/5 border-foreground/10',
-  ignored: 'text-destructive-foreground bg-destructive/10 border-destructive',
+  new: 'text-muted-foreground bg-muted/40 border-muted-foreground/20',
+  learning: 'text-primary bg-primary/10 border-primary/20',
+  mastered:
+    'text-emerald-700 bg-emerald-500/10 border-emerald-500/20 dark:text-emerald-300',
+  ignored: 'text-destructive bg-destructive/10 border-destructive/20',
 }
-
-const dateFormatter = new Intl.DateTimeFormat('zh-CN', {
-  month: 'short',
-  day: 'numeric',
-  hour: 'numeric',
-  minute: 'numeric',
-})
 
 const getStatusLabel = (status: UWordStatus) => {
   switch (status) {
@@ -74,7 +69,7 @@ export const wordLibraryColumns: ColumnDef<UWord>[] = [
       const value = getValue<number>()
       return (
         <div className='text-sm text-muted-foreground'>
-          {value ? dateFormatter.format(new Date(value)) : '—'}
+          {value ? dayjs(value).format('YYYY-MM-DD HH:mm:ss') : '—'}
         </div>
       )
     },
@@ -88,7 +83,7 @@ export const wordLibraryColumns: ColumnDef<UWord>[] = [
       const value = getValue<number>()
       return (
         <div className='text-sm text-muted-foreground'>
-          {value ? dateFormatter.format(new Date(value)) : '—'}
+          {value ? dayjs(value).format('YYYY-MM-DD HH:mm:ss') : '—'}
         </div>
       )
     },

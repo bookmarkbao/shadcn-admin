@@ -1,7 +1,3 @@
-# 数据库 REST 服务
-
-无需鉴权的本地 SQLite 访问层，提供 `/api/db/:table` 形式的通用 CRUD。默认绑定在 API Server 端口（23333），仅监听 `127.0.0.1`/`::1`。
-
 ## 快速开始
 
 1. 确保 API Server 已启用。
@@ -25,13 +21,24 @@
 | 创建        | POST   | `/api/db/:table`     | body 为 JSON 对象              |
 | 更新        | PUT    | `/api/db/:table/:id` | body 为要更新的列              |
 | 删除        | DELETE | `/api/db/:table/:id` | 依据主键删除                   |
+| 批量创建    | POST   | `/api/db/:table/batch` | body 为 JSON 数组（对象列表）  |
+| 批量更新    | PATCH  | `/api/db/:table/batch` | body 为 JSON 数组（每项含主键） |
+| 批量删除    | DELETE | `/api/db/:table/batch` | body 为 `{ ids: [...] }`       |
+
+## 受保护的表
+
+为保护系统关键数据，下列表名无法访问：
+`migrate, folders, folder_items, folder_stats, workspaces, media_files, subtitle_tracks, subtitle_lines, subtitle_fts, favorite_sentences, merge_projects, merge_clips, plugins, plugin_repos`
+
+表名解析大小写不敏感；尝试访问受限表会返回 `403 Access to table "xxx" is restricted`。
 
 ## 查询参数
 
 | 参数                  | 用法                                          | 示例                            |
 | --------------------- | --------------------------------------------- | ------------------------------- |
-| `column=value`        | 等值 / IN（逗号分隔）                         | `status=learning`, `word=a,b,c` |
+| `column=value`        | 等值（重复参数会自动视为 IN）                 | `status=learning`, `status=new&status=mastered` |
 | `column_ne=value`     | 不等于                                        | `status_ne=ignored`             |
+| `column_in=value`     | IN（逗号分隔或重复参数）                      | `status_in=new,learning,mastered` |
 | `column_gte=value`    | 大于等于                                      | `added_at_gte=1737446400000`    |
 | `column_lte=value`    | 小于等于                                      | `added_at_lte=1737532800000`    |
 | `column_like=keyword` | 模糊匹配（自动包裹 `%`）                      | `word_like=apple`               |
@@ -46,3 +53,4 @@
 - Body 必须是 JSON 对象，字段名需满足 `/^[A-Za-z_][A-Za-z0-9_]*$/`。
 - POST 会返回 `{ success: 1, id: <lastInsertRowId> }`；若主键为 `INTEGER PRIMARY KEY`, 会自动读取 `lastInsertRowid`。
 - PUT/DELETE 若没有匹配行，会返回 `success:0, message:'No rows updated/deleted'`。
+
