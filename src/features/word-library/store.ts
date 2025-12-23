@@ -17,7 +17,7 @@ const API_BASE_URL =
 
 type RawWordRecord = {
   word: string
-  status: UWordStatus
+  status: unknown
   added_at: number
   updated_at: number
 }
@@ -49,6 +49,18 @@ const normalizePages = (
   last: json.pages?.last ?? 0,
   total: json.pages?.total ?? (Array.isArray(json.data) ? json.data.length : 0),
 })
+
+const normalizeUWordStatus = (value: unknown): UWordStatus => {
+  if (
+    value === 'new' ||
+    value === 'learning' ||
+    value === 'mastered' ||
+    value === 'ignored'
+  ) {
+    return value
+  }
+  return 'new'
+}
 
 type WordLibraryState = {
   word: string
@@ -242,7 +254,7 @@ export const useWordLibraryStore = create<WordLibraryState>((set, get) => ({
         Array.isArray(json.data) && json.data.length > 0
           ? json.data.map((item) => ({
               word: item.word,
-              status: item.status,
+              status: normalizeUWordStatus(item.status),
               addedAt: item.added_at,
               updatedAt: item.updated_at,
             }))

@@ -8,7 +8,7 @@
 
 /**
  * 单词状态
- * - new: 刚加入
+ * - new: 刚加入（默认/未标记）
  * - learning: 我在学
  * - mastered: 我会了
  * - ignored: 我不想管
@@ -17,6 +17,10 @@
  */
 export type UWordStatus = 'new' | 'learning' | 'mastered' | 'ignored'
 
+/**
+ * 词库命中状态（用于“查词/对比辞书”等临时计算，不落库）
+ */
+export type WordLibraryHitStatus = 'in_library' | 'not_in_library'
 /**
  * 用户词库单词
  */

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import {
@@ -30,10 +30,6 @@ export function WordLibraryEditDialog({
 
   const [status, setStatus] = useState<UWordStatus>(currentRow.status)
 
-  useEffect(() => {
-    if (open) setStatus(currentRow.status)
-  }, [open, currentRow.status])
-
   const handleSave = async () => {
     await toast.promise(updateWordStatus({ word: currentRow.word, status }), {
       loading: '正在更新...',
@@ -44,8 +40,14 @@ export function WordLibraryEditDialog({
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className='sm:max-w-md'>
+    <Dialog
+      open={open}
+      onOpenChange={(next) => {
+        onOpenChange(next)
+        if (next) setStatus(currentRow.status)
+      }}
+    >
+      <DialogContent key={currentRow.word} className='sm:max-w-md'>
         <DialogHeader className='text-start'>
           <DialogTitle>编辑</DialogTitle>
           <DialogDescription>

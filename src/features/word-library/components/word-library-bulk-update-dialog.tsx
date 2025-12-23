@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import {
@@ -34,10 +34,6 @@ export function WordLibraryBulkUpdateDialog({
 
   const [status, setStatus] = useState<UWordStatus>('learning')
 
-  useEffect(() => {
-    if (open) setStatus('learning')
-  }, [open])
-
   const handleUpdate = async () => {
     if (words.length === 0) return
 
@@ -52,7 +48,13 @@ export function WordLibraryBulkUpdateDialog({
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog
+      open={open}
+      onOpenChange={(next) => {
+        onOpenChange(next)
+        if (next) setStatus('learning')
+      }}
+    >
       <DialogContent className='sm:max-w-md'>
         <DialogHeader className='text-start'>
           <DialogTitle>批量更新状态</DialogTitle>
