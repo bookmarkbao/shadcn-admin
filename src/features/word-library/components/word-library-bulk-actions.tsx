@@ -29,7 +29,7 @@ export function WordLibraryBulkActions<TData>({
 
   return (
     <>
-      <BulkActionsToolbar table={table} entityName='word'>
+      <BulkActionsToolbar table={table} entityName='单词'>
         <Tooltip>
           <TooltipTrigger asChild>
             <Button
