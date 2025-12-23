@@ -143,7 +143,7 @@ export const useWordLibraryStore = create<WordLibraryState>((set, get) => ({
   loading: false,
   mutating: false,
   error: null,
-  isFluid: false,
+  isFluid: true,
   setWord: (value) => set(() => ({ word: value, page: 1 })), // reset to first page when filter changes
   toggleStatus: (value) =>
     set((state) => {
