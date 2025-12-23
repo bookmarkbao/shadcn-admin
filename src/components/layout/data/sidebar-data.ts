@@ -85,6 +85,11 @@ export const sidebarData: SidebarData = {
           icon: Library,
         },
         {
+          title: 'Express Library',
+          url: '/express-library',
+          icon: Library,
+        },
+        {
           title: 'Secured by Clerk',
           icon: ClerkLogo,
           items: [

@@ -1,0 +1,37 @@
+export const data = {
+  success: 1,
+  data: [
+    {
+      id: 'b8c83a37-08a8-4bdc-bc14-5b68643a2ec4',
+      expression: 'That makes sense.',
+      meaning: '有道理 / 我明白了',
+      note: null,
+      status: 'new',
+      practice_count: 0,
+      usage_count: 0,
+      tags: '日常',
+      added_at: 1765572906121,
+      updated_at: 1765572906121,
+    },
+    {
+      id: 'b88f7e89-3d13-4c28-b0c3-8f4fbbe4f6d5',
+      expression: 'Could you elaborate on that?',
+      meaning: '你能详细说说吗？',
+      note: null,
+      status: 'learning',
+      practice_count: 3,
+      usage_count: 1,
+      tags: '直播,工作',
+      added_at: 1765572911092,
+      updated_at: 1765572911092,
+    },
+  ],
+  pages: {
+    page: 1,
+    pageSize: 2,
+    next: 2,
+    previous: null,
+    last: 53,
+    total: 105,
+  },
+}

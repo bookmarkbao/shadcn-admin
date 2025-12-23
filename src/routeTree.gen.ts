@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as ClerkRouteRouteImport } from './routes/clerk/route'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as WordLibraryIndexRouteImport } from './routes/word-library/index'
+import { Route as ExpressLibraryIndexRouteImport } from './routes/express-library/index'
 import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
 import { Route as errors503RouteImport } from './routes/(errors)/503'
 import { Route as errors500RouteImport } from './routes/(errors)/500'
@@ -53,6 +54,11 @@ const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
 const WordLibraryIndexRoute = WordLibraryIndexRouteImport.update({
   id: '/word-library/',
   path: '/word-library/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ExpressLibraryIndexRoute = ExpressLibraryIndexRouteImport.update({
+  id: '/express-library/',
+  path: '/express-library/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedIndexRoute = AuthenticatedIndexRouteImport.update({
@@ -217,6 +223,7 @@ export interface FileRoutesByFullPath {
   '/500': typeof errors500Route
   '/503': typeof errors503Route
   '/': typeof AuthenticatedIndexRoute
+  '/express-library': typeof ExpressLibraryIndexRoute
   '/word-library': typeof WordLibraryIndexRoute
   '/errors/$error': typeof AuthenticatedErrorsErrorRoute
   '/settings/account': typeof AuthenticatedSettingsAccountRoute
@@ -246,6 +253,7 @@ export interface FileRoutesByTo {
   '/500': typeof errors500Route
   '/503': typeof errors503Route
   '/': typeof AuthenticatedIndexRoute
+  '/express-library': typeof ExpressLibraryIndexRoute
   '/word-library': typeof WordLibraryIndexRoute
   '/errors/$error': typeof AuthenticatedErrorsErrorRoute
   '/settings/account': typeof AuthenticatedSettingsAccountRoute
@@ -280,6 +288,7 @@ export interface FileRoutesById {
   '/(errors)/500': typeof errors500Route
   '/(errors)/503': typeof errors503Route
   '/_authenticated/': typeof AuthenticatedIndexRoute
+  '/express-library/': typeof ExpressLibraryIndexRoute
   '/word-library/': typeof WordLibraryIndexRoute
   '/_authenticated/errors/$error': typeof AuthenticatedErrorsErrorRoute
   '/_authenticated/settings/account': typeof AuthenticatedSettingsAccountRoute
@@ -312,6 +321,7 @@ export interface FileRouteTypes {
     | '/500'
     | '/503'
     | '/'
+    | '/express-library'
     | '/word-library'
     | '/errors/$error'
     | '/settings/account'
@@ -341,6 +351,7 @@ export interface FileRouteTypes {
     | '/500'
     | '/503'
     | '/'
+    | '/express-library'
     | '/word-library'
     | '/errors/$error'
     | '/settings/account'
@@ -374,6 +385,7 @@ export interface FileRouteTypes {
     | '/(errors)/500'
     | '/(errors)/503'
     | '/_authenticated/'
+    | '/express-library/'
     | '/word-library/'
     | '/_authenticated/errors/$error'
     | '/_authenticated/settings/account'
@@ -404,6 +416,7 @@ export interface RootRouteChildren {
   errors404Route: typeof errors404Route
   errors500Route: typeof errors500Route
   errors503Route: typeof errors503Route
+  ExpressLibraryIndexRoute: typeof ExpressLibraryIndexRoute
   WordLibraryIndexRoute: typeof WordLibraryIndexRoute
 }
 
@@ -428,6 +441,13 @@ declare module '@tanstack/react-router' {
       path: '/word-library'
       fullPath: '/word-library'
       preLoaderRoute: typeof WordLibraryIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/express-library/': {
+      id: '/express-library/'
+      path: '/express-library'
+      fullPath: '/express-library'
+      preLoaderRoute: typeof ExpressLibraryIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/': {
@@ -733,6 +753,7 @@ const rootRouteChildren: RootRouteChildren = {
   errors404Route: errors404Route,
   errors500Route: errors500Route,
   errors503Route: errors503Route,
+  ExpressLibraryIndexRoute: ExpressLibraryIndexRoute,
   WordLibraryIndexRoute: WordLibraryIndexRoute,
 }
 export const routeTree = rootRouteImport
